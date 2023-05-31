@@ -1,41 +1,33 @@
 {
-    "version": "1.4.6",
-    "manifest_version": 2,
-    "default_locale": "en",
-    "description": "__MSG_appDesc__",
-    "name": "__MSG_appName__",
-    "icons": {
-        "128": "images/on.png",
-        "48":  "images/on48.png",
-        "16":  "images/on16.png"
-    },
-    "permissions": [
-        "file://*/*",
-        "proxy",
-        "tabs",
-        "storage",
-        "unlimitedStorage",
-        "<all_urls>",
-        "webRequest",
-        "webRequestBlocking"
-    ],
-    "background": {
-        "scripts": ["background.js"]
-    },
-    "commands": {
-        "open-option": {
-          "suggested_key": {
-            "default": "Alt+O"},
-          "description": "Open option page"
-        }
-    },
-    "options_page": "options.html",
-    "browser_action": {
-        "default_icon": "images/off.png",
-        "default_title": "__MSG_title__",
-        "default_popup": "popup.html"
-    },
-    "update_url" : "http://clients2.google.com/service/update2/crx",
-    "minimum_chrome_version":"38.0.0"
+	"version": "1.4.6",
+	"manifest_version": 3,
+	"default_locale": "en",
+	"description": "__MSG_appDesc__",
+	"name": "__MSG_appName__",
+	"icons": {
+		"128": "images/on.png",
+		"48": "images/on48.png",
+		"16": "images/on16.png"
+	},
+	"host_permissions": ["*://*/*", "<all_urls>"],
+	"permissions": ["proxy", "tabs", "storage", "unlimitedStorage", "webRequest", "declarativeNetRequest", "webRequestAuthProvider"],
+	"background": {
+		"service_worker": "background.js"
+	},
+	"commands": {
+		"open-option": {
+			"suggested_key": {
+				"default": "Alt+O"
+			},
+			"description": "Open option page"
+		}
+	},
+	"options_page": "options.html",
+	"action": {
+		"default_icon": "images/off.png",
+		"default_title": "__MSG_title__",
+		"default_popup": "popup.html"
+	},
+	"update_url": "http://clients2.google.com/service/update2/crx",
+	"minimum_chrome_version": "38.0.0"
 }
-

@@ -1,6 +1,11 @@
 ChangeLog
 ===================================================
-
+2023-05-31 (1.4.2)
+    1. used prettier on multiple files
+    2. remove jquery
+    3. removed/commented out javascrit that gave errors
+    4. converted code to use manifest 3.0
+    5. added save button back to not auto save on blur
 2022-1-5   (1.4.1)
     1. Updated Russian translation
 
