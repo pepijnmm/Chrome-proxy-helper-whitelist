@@ -12,14 +12,14 @@ var firstime = false;
 var proxySetting = [];
 var proxyInfo = null;
 function save_settings() {
-	chrome.storage.sync.set({
+	chrome.storage.local.set({
 		firstime: firstime,
 		chinaList: chinaList,
 		proxyInfo: proxyInfo,
 	});
 }
 function load_settings(start_after_load = () => {}) {
-	chrome.storage.sync.get(
+	chrome.storage.local.get(
 		{
 			proxySetting: [],
 			proxyInfo: null,

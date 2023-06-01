@@ -6,6 +6,9 @@ ChangeLog
     3. removed/commented out javascrit that gave errors
     4. converted code to use manifest 3.0
     5. added save button back to not auto save on blur
+    6. use chrome.storage.local to save settings
+    7. create option to reset settings
+    8. create option to auto enable vpn on specific urls
 2022-1-5   (1.4.1)
     1. Updated Russian translation
 

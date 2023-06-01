@@ -19,6 +19,7 @@
             <div id="save-buttons">
                 <button id="btn-save"  data-i18n-content="save">Save</button>
                 <button id="btn-cancel" data-i18n-content="cancel">Cancel</button>
+                <button id="btn-reset" data-i18n-content="reset">Reset</button>
             </div>
         </div>
         <div class="navigation">
@@ -32,6 +33,9 @@
                 </li>
                 <li>
                     <a href="#rules" data-i18n-content="Rules">Rules</a>
+                </li>
+                <li>
+                    <a href="#auto-enable-proxy" data-i18n-content="auto_enable_proxy">Auto enable list</a>
                 </li>
                 <li>
                     <a href="#auth-config" data-i18n-content="authConfig">Authentication</a>
@@ -138,6 +142,20 @@
                     </div>
                 </section>
                 -->
+            </div>
+        </div>
+        <div id="auto-enable-proxy">
+            <h1 data-i18n-content="auto_enable_proxy">Auto Enable Proxy</h1>
+            <div class="content">
+                    <h3 data-i18n-content="config_auto_proxy_list">List</h3>
+                    <p data-i18n-content="config_auto_proxy_list_description">Domains in the list will automatically start the vpn(it will start the vpn after part of the page is already loaded)</p>
+                    <p>ie: /(.+)youtube\.com(\/*)/gi, you can use: <a href="https://www.regexpal.com/">regexpal.com</a></p>
+                    <div class="section">
+                        <textarea id="auto-enable-list" cols="55" rows="10" placeholder="/(.+)youtube\.com(\/*)/gi
+/(.+)primevideo\.com(\/*)/gi"></textarea>
+                    </div>
+                    <h4 data-i18n-content="when_auto_proxy">how much days before enabling again?(leave empty for every time) you can use h(hour) d(day) w(week) m(month)</h3>
+                        <input type="text" id="set-timer-auto-enable" placeholder="1d1w">
             </div>
         </div>
         <div id="auth-config">

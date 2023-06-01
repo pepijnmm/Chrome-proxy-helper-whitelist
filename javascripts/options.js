@@ -8,14 +8,14 @@ var proxyInfo = null;
 var firstime = true;
 var chinaList = ["*.cn"];
 function save_settings() {
-	chrome.storage.sync.set({
+	chrome.storage.local.set({
 		firstime: firstime,
 		proxyInfo: proxyInfo,
 		proxySetting: proxySetting,
 	});
 }
 function load_settings(startafter = () => {}) {
-	chrome.storage.sync.get(
+	chrome.storage.local.get(
 		{
 			proxySetting: [],
 			proxyInfo: null,
@@ -31,12 +31,15 @@ function load_settings(startafter = () => {}) {
 		}
 	);
 }
-load_settings(() => {
-	if (firstime) loadOldInfo();
-	else loadProxyData();
+function load() {
+	load_settings(() => {
+		if (firstime) loadOldInfo();
+		else loadProxyData();
 
-	getProxyInfo();
-});
+		getProxyInfo();
+	});
+}
+load();
 function loadProxyData() {
 	document.querySelector("#socks-host").value = proxySetting["socks_host"] || "";
 	document.querySelector("#socks-port").value = proxySetting["socks_port"] || "";
@@ -49,6 +52,8 @@ function loadProxyData() {
 	document.querySelector("#pac-type").value = proxySetting["pac_type"] || "file://";
 	document.querySelector("#pac-data").value = proxySetting["pac_data"] || "";
 	document.querySelector("#bypasslist").value = proxySetting["bypasslist"] || "";
+	document.querySelector("#auto-enable-list").value = proxySetting["auto_enable_list"] || "";
+	document.querySelector("#set-timer-auto-enable").value = proxySetting["auto_enable_timer"] || "";
 	//part of the white/blacklist as rest of the code is disabled will for now also be disabled.
 	//document.querySelector("#rules-mode").value = proxySetting["rules_mode"] || "Whitelist";
 	document.querySelector("#proxy-rule").value = proxySetting["proxy_rule"] || "singleProxy";
@@ -92,8 +97,20 @@ function loadProxyData() {
 		document.querySelector("#whitelist").style.display = "none";
 	}
 	document.querySelector("#btn-save").onclick = () => {
-		save();
-		document.querySelector("#unsaved-changes").style.display = "none";
+		if (document.querySelector("#unsaved-changes").style.display == "block") {
+			save();
+			document.querySelector("#unsaved-changes").style.display = "none";
+		}
+	};
+
+	document.querySelector("#btn-reset").onclick = () => {
+		var message = chrome.i18n.getMessage("check-reset-settings"); //data-i18n-content
+		if (window.confirm(message || "Are you sure you want to reset the settings?")) {
+			firstime = true;
+			save_settings();
+			chrome.runtime.sendMessage({ command: "reset-settings" });
+			load();
+		}
 	};
 
 	document.querySelector("#btn-cancel").onclick = () => {
@@ -123,12 +140,47 @@ function loadProxyData() {
 
 	document.querySelectorAll("textarea").forEach((e) =>
 		e.addEventListener("change", () => {
-			document.querySelector("#unsaved-changes").style.display = "block";
+			if (e.getAttribute("id") != "auto-enable-list") {
+				document.querySelector("#unsaved-changes").style.display = "block";
+			}
 		})
 	);
 
 	document.querySelector("#proxy-rule").addEventListener("change", () => {
 		document.querySelector("#unsaved-changes").style.display = "block";
+	});
+
+	var regStrip = /^[\r\t\f\v ]+|[\r\t\f\v ]+$/gm;
+	var regEndsWithFlags = /\/(?!.*(.).*\1)[gimsuy]*$/;
+
+	document.querySelector("#auto-enable-list").addEventListener("change", () => {
+		var valid = true;
+		document
+			.querySelector("#auto-enable-list")
+			.value.split("\n")
+			.forEach((match) => {
+				match = match.replace(regStrip, "");
+
+				if (match.startsWith("/")) {
+					try {
+						var parts = match.split("/");
+
+						if (parts.length < 3) throw "invalid regex";
+
+						var flags = parts.pop();
+						var regex = parts.slice(1).join("/");
+
+						var regexp = new RegExp(regex, flags);
+					} catch (err) {
+						alert('Error: Invalid blacklist regex: "' + match + '". Unable to save. Try wrapping it in foward slashes.');
+						valid = false;
+						return;
+					}
+				}
+			});
+		if (valid) {
+			document.querySelector("#unsaved-changes").style.display = "block";
+		}
 	});
 
 	//part of the white/blacklist as rest of the code is disabled will for now also be disabled.
@@ -412,6 +464,8 @@ function save() {
 	proxySetting["pac_data"] = document.querySelector("#pac-data").value || "";
 	proxySetting["bypasslist"] = document.querySelector("#bypasslist").value || "";
 	proxySetting["proxy_rule"] = document.querySelector("#proxy-rule").value || "";
+	proxySetting["auto_enable_list"] = document.querySelector("#auto-enable-list").value || "";
+	proxySetting["auto_enable_timer"] = document.querySelector("#set-timer-auto-enable").value || "";
 	//proxySetting['rules_mode'] = document.querySelector('#rules-mode').value || "";
 	proxySetting["auth"]["user"] = document.querySelector("#username").value || "";
 	proxySetting["auth"]["pass"] = document.querySelector("#password").value || "";
@@ -419,9 +473,6 @@ function save() {
 	if (document.querySelector("#socks5").checked) proxySetting["socks_type"] = "socks5";
 
 	if (document.querySelector("#socks4").checked) proxySetting["socks_type"] = "socks4";
-
-	if (document.querySelector("#use-pass").checked) proxySetting["auth"]["enable"] = "y";
-	else proxySetting["auth"]["enable"] = "";
 
 	if (document.querySelector("#china-list").checked) {
 		proxySetting["internal"] = "china";
@@ -444,6 +495,8 @@ function save() {
 	save_settings();
 	reloadProxy();
 	loadProxyData();
+	//reloads data on background.js
+	chrome.runtime.sendMessage({ command: "load-settings" });
 }
 
 // /**

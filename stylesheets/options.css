@@ -20,16 +20,16 @@
 }
 #title {
 	float: left;
-	width: 290px;
 	margin: 15px 0 18px 15px;
 }
 #title-unsaved-changes{
-	width: 440px;
+    width: 60%;
     float: left;
+    max-width: 440px;
 }
 #unsaved-changes{
-    float:left;
-	margin: 15px 0 18px 0;
+    float:right;
+	margin: 15px 20px 15px 0;
     display: none;
     color:red;
 }
