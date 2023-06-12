@@ -129,7 +129,7 @@
                     </div>
                     <h4 data-i18n-content="use_predefine_list">Use internal proxy bypass list</h3>
                     <div class="checkbox">
-                        <input id='china-list' type="checkbox" id="use-china-list"/>
+                        <input id='china-list' type="checkbox"/>
                         <span data-i18n-content="china_list">China List</span>
                     </div>
                 </section>
@@ -147,8 +147,8 @@
         <div id="auto-enable-proxy">
             <h1 data-i18n-content="auto_enable_proxy">Auto Enable Proxy</h1>
             <div class="content">
-                    <h3 data-i18n-content="config_auto_proxy_list">List</h3>
-                    <p data-i18n-content="config_auto_proxy_list_description">Domains in the list will automatically start the vpn(it will start the vpn after part of the page is already loaded)</p>
+                    <h3 data-i18n-content="list_auto_proxy">List</h3>
+                    <p data-i18n-content="list_description_auto_proxy">Domains in the list will automatically start the vpn(it will start the vpn after part of the page is already loaded)</p>
                     <p>ie: /(.+)youtube\.com(\/*)/gi, you can use: <a href="https://www.regexpal.com/">regexpal.com</a></p>
                     <div class="section">
                         <textarea id="auto-enable-list" cols="55" rows="10" placeholder="/(.+)youtube\.com(\/*)/gi
@@ -156,6 +156,10 @@
                     </div>
                     <h4 data-i18n-content="when_auto_proxy">how much days before enabling again?(leave empty for every time) you can use h(hour) d(day) w(week) m(month)</h3>
                         <input type="text" id="set-timer-auto-enable" placeholder="1d1w">
+                        <div class="checkbox">
+                            <input id='block-sites' type="checkbox"/>
+                            <span data-i18n-content="block_sites_auto_proxy">Block sites from the list from being accessed without proxy</span>
+                        </div>
             </div>
         </div>
         <div id="auth-config">
@@ -234,10 +238,6 @@
                             </tr>
                         </thead>
                         <tbody style="display: table-row-group;">
-                            <tr>
-                                <td><a href="https://jquery.org" target="_blank">jQuery</a></td>
-                                <td><a href="https://github.com/jquery/jquery/blob/master/LICENSE.txt" target="_blank">LICENSE.txt</a></td>
-                            </tr>
                             <tr>
                                 <td><a href="https://github.com/roykolak/chrome-bootstrap" target="_blank">chrome-bootstrap</a></td>
                                 <td><a href="http://opensource.org/licenses/mit-license.php" target="_blank">MIT</a></td>

@@ -1,5 +1,5 @@
 {
-	"version": "1.4.6",
+	"version": "1.4.8",
 	"manifest_version": 3,
 	"default_locale": "en",
 	"description": "__MSG_appDesc__",
@@ -10,7 +10,7 @@
 		"16": "images/on16.png"
 	},
 	"host_permissions": ["*://*/*", "<all_urls>"],
-	"permissions": ["proxy", "tabs", "storage", "unlimitedStorage", "webRequest", "declarativeNetRequest", "webRequestAuthProvider"],
+	"permissions": ["proxy", "tabs", "storage", "webRequest", "declarativeNetRequest", "webRequestAuthProvider"],
 	"background": {
 		"service_worker": "background.js"
 	},
@@ -29,5 +29,5 @@
 		"default_popup": "popup.html"
 	},
 	"update_url": "http://clients2.google.com/service/update2/crx",
-	"minimum_chrome_version": "38.0.0"
+	"minimum_chrome_version": "88.0.0"
 }

@@ -7,14 +7,14 @@ var proxySetting = [];
 var proxyInfo = null;
 var firstime = true;
 var chinaList = ["*.cn"];
-function save_settings() {
+function saveSettings() {
 	chrome.storage.local.set({
 		firstime: firstime,
 		proxyInfo: proxyInfo,
 		proxySetting: proxySetting,
 	});
 }
-function load_settings(startafter = () => {}) {
+function loadSettings(startafter = () => {}) {
 	chrome.storage.local.get(
 		{
 			proxySetting: [],
@@ -32,7 +32,7 @@ function load_settings(startafter = () => {}) {
 	);
 }
 function load() {
-	load_settings(() => {
+	loadSettings(() => {
 		if (firstime) loadOldInfo();
 		else loadProxyData();
 
@@ -79,6 +79,10 @@ function loadProxyData() {
 		document.querySelector("#china-list").setAttribute("checked", "");
 	}
 
+	if (proxySetting["auto_enable_block_sites"] == true) {
+		document.querySelector("#block-sites").setAttribute("checked", "");
+	}
+
 	if (proxySetting["rules_mode"] == "Whitelist") {
 		document.querySelector("#bypasslist").removeAttribute("disabled");
 		//part of the white/blacklist as rest of the code is disabled will for now also be disabled.
@@ -107,7 +111,7 @@ function loadProxyData() {
 		var message = chrome.i18n.getMessage("check-reset-settings"); //data-i18n-content
 		if (window.confirm(message || "Are you sure you want to reset the settings?")) {
 			firstime = true;
-			save_settings();
+			saveSettings();
 			chrome.runtime.sendMessage({ command: "reset-settings" });
 			load();
 		}
@@ -286,7 +290,7 @@ function loadOldInfo() {
 	});
 
 	firstime = false;
-	save_settings();
+	saveSettings();
 }
 
 /**
@@ -322,7 +326,7 @@ function getProxyInfo() {
 			if (url) proxyInfo = "pac_url";
 			else proxyInfo = "pac_data";
 		} else if (mode == "fixed_servers") proxyInfo = rules[proxyRule]["scheme"];
-		save_settings();
+		saveSettings();
 	});
 }
 
@@ -474,6 +478,8 @@ function save() {
 
 	if (document.querySelector("#socks4").checked) proxySetting["socks_type"] = "socks4";
 
+	proxySetting["auto_enable_block_sites"] = document.querySelector("#block-sites").checked;
+
 	if (document.querySelector("#china-list").checked) {
 		proxySetting["internal"] = "china";
 	} else {
@@ -492,7 +498,7 @@ function save() {
 		proxySetting["pac_script_url"][pacType] = pacScriptUrl;
 	} catch (err) {}
 
-	save_settings();
+	saveSettings();
 	reloadProxy();
 	loadProxyData();
 	//reloads data on background.js
@@ -594,3 +600,19 @@ window.onbeforeunload = function () {
 		return false;
 	}
 };
+
+/*
+ * here commands can come in.
+ */
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	commands(message.command, message.data);
+});
+/*
+ * reseives all comands for the background and sends them to the right way.
+ */
+function commands(command, data = null) {
+	switch (command) {
+		case "load-settings":
+			loadSettings();
+	}
+}
