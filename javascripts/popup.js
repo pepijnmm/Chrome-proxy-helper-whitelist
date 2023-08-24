@@ -95,9 +95,11 @@ function add_li_title() {
 function color_proxy_item() {
 	var mode, rules, proxyRule, scheme;
 
-	chrome.proxy.settings.get({ incognito: false }, function (config) {
-		mode = config["value"]["mode"];
-		rules = config["value"]["rules"];
+	chrome.runtime.sendMessage({ command: "get-proxy-status" }, function (config) {
+		if ((config["value"]["mode"] == "pac_script" && config.value.pacScript.data.includes("function shouldNotProxy")) == false) {
+			mode = config["value"]["mode"];
+			rules = config["value"]["rules"];
+		}
 
 		if (rules) {
 			if (rules.hasOwnProperty("singleProxy")) {
@@ -243,6 +245,9 @@ function commands(command, data = null) {
 	switch (command) {
 		case "proxy-selected":
 			proxySelected(data);
+			break;
+		case "alert":
+			alert(data);
 			break;
 	}
 }

@@ -1,5 +1,10 @@
 ChangeLog
 ===================================================
+2023-08-24 (1.4.9)
+    1. moved more commands to background.js
+    2. clear proxy so that other extentions can use it again on disable
+    3. disable button instead of system button
+    4. show error if another extention is blockign proxy access
 2023-06-11 (1.4.8)
     1. added support for auto enable proxy
     2. added support for having a timer till when the auto proxy enables again.

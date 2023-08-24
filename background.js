@@ -45,13 +45,32 @@ function loadSettings(startafter = () => {}) {
 }
 
 function setProxyIcon() {
-	chrome.proxy.settings.get({ incognito: false }, function (config) {
-		if (config["value"]["mode"] == "system" || config["value"]["mode"] == "direct") {
-			iconSet("off");
-		} else {
-			iconSet("on");
-		}
+	getChromeProxyInfo((config) => {
+		checkChromeProxyInfo(
+			config,
+			() => iconSet("on"),
+			() => iconSet("off")
+		);
 	});
+}
+function getChromeProxyInfo(callback) {
+	chrome.proxy.settings.get({ incognito: false }, function (config) {
+		callback(config);
+	});
+}
+function checkChromeProxyInfo(config, on = () => {}, off = () => {}) {
+	//shouldNotProxy is used in some vpn apps, it's not used in this extention so we won't turn on the icon
+	if (
+		config["value"]["mode"] == "system" ||
+		config["value"]["mode"] == "direct" ||
+		(config["value"]["mode"] == "pac_script" && config.value.pacScript.data.includes("function shouldNotProxy")) ||
+		//if proxy isn't controlled by this extention show that it's turned off.
+		(config["levelOfControl"] && config["levelOfControl"] == "controlled_by_other_extensions")
+	) {
+		off();
+	} else {
+		on();
+	}
 }
 
 function gotoPage(url) {
@@ -108,16 +127,17 @@ chrome.runtime.onInstalled.addListener(function (details) {
 */
 });
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	commands(message.command, message.data);
+	commands(message.command, message.data, sendResponse);
+	return true;
 });
 chrome.commands.onCommand.addListener((command) => {
 	commands(command);
 });
 
 /*
- * reseives all comands for the background and sends them to the right way.
+ * resieves all comands for the background and sends them to the right way.
  */
-function commands(command, data = null) {
+function commands(command, data = null, callback = (e) => {}) {
 	switch (command) {
 		case "open-option":
 			gotoPage("options.html");
@@ -138,6 +158,15 @@ function commands(command, data = null) {
 			}
 			startProxy(data);
 			break;
+		case "get-proxy-status":
+			getChromeProxyInfo((config) => {
+				checkChromeProxyInfo(
+					config,
+					() => iconSet("on"),
+					() => iconSet("off")
+				);
+				callback(config);
+			});
 	}
 }
 
@@ -468,7 +497,7 @@ function directProxy() {
 
 	chrome.proxy.settings.set({ value: config, scope: "regular" }, function () {});
 
-	iconSet("off");
+	iconSet("on");
 	chrome.runtime.sendMessage({ command: "proxy-selected", data: "direct-proxy" });
 	proxyInfo = "direct";
 	saveSettings();
@@ -476,6 +505,10 @@ function directProxy() {
 
 /**
  * set system proxy
+ * Turns the proxy off.
+ * chrome.proxy.settings.set({ value: { mode: "system",	}, scope: "regular" }, function () {});
+ * isn't used here as it will block other proxy extentions from starting a proxy as chrome.proxy.settings.get
+ * will return: {levelOfControl: "controlled_by_other_extensions"...} if in mode system
  *
  */
 function sysProxy() {
@@ -483,7 +516,7 @@ function sysProxy() {
 		mode: "system",
 	};
 
-	chrome.proxy.settings.set({ value: config, scope: "regular" }, function () {});
+	chrome.proxy.settings.clear({ scope: "regular" }, function () {});
 
 	iconSet("off");
 	chrome.runtime.sendMessage({ command: "proxy-selected", data: "sys-proxy" });
@@ -552,34 +585,43 @@ function iconSet(str) {
 }
 //choose depending on the data which proxy should be started
 function startProxy(data) {
-	switch (data) {
-		case "pacDatatProxy":
-			pacDatatProxy();
-			break;
-		case "pacUrlProxy":
-			pacUrlProxy();
-			break;
-		case "socks5Proxy":
-			socks5Proxy();
-			break;
-		case "httpProxy":
-			httpProxy();
-			break;
-		case "httpsProxy":
-			httpsProxy();
-			break;
-		case "quicProxy":
-			quicProxy();
-			break;
-		case "directProxy":
-			directProxy();
-			break;
-		case "autoProxy":
-			autoProxy();
-			break;
-		case "sysProxy":
-		case "system":
-			sysProxy();
-			break;
-	}
+	chrome.proxy.settings.get({ incognito: false }, function (config) {
+		if (config["levelOfControl"] && config["levelOfControl"] == "controlled_by_other_extensions") {
+			chrome.runtime.sendMessage({
+				command: "alert",
+				data: chrome.i18n.getMessage("error_extention_blocking_proxy") || "An extention has the proxy blocked.\nDisable that extention or the vpn on that extention.\nExtentions like nordvpn for example can block the proxy.",
+			});
+		} else {
+			switch (data) {
+				case "pacDatatProxy":
+					pacDatatProxy();
+					break;
+				case "pacUrlProxy":
+					pacUrlProxy();
+					break;
+				case "socks5Proxy":
+					socks5Proxy();
+					break;
+				case "httpProxy":
+					httpProxy();
+					break;
+				case "httpsProxy":
+					httpsProxy();
+					break;
+				case "quicProxy":
+					quicProxy();
+					break;
+				case "directProxy":
+					directProxy();
+					break;
+				case "autoProxy":
+					autoProxy();
+					break;
+				case "sysProxy":
+				case "system":
+					sysProxy();
+					break;
+			}
+		}
+	});
 }
