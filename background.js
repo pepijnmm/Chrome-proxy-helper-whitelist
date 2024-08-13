@@ -90,7 +90,7 @@ function gotoPage(url) {
 }
 
 function callbackFn(details) {
-	if (proxySetting) {
+	if (proxySetting && proxySetting["auth"]) {
 		var auth = proxySetting["auth"];
 		var username = auth["user"];
 		var password = auth["pass"];
@@ -103,7 +103,7 @@ function callbackFn(details) {
 	if (regStrip.test(details.url)) {
 		return {};
 	}
-	if (proxySetting["auth"]["user"] == "" && proxySetting["auth"]["pass"] == "") return {};
+	if (proxySetting?.auth?.user == "" && proxySetting?.auth?.pass == "") return {};
 
 	return { authCredentials: { username: username, password: password } };
 }
